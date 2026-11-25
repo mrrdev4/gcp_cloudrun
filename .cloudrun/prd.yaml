@@ -54,7 +54,6 @@ traffic:
   tag_traffic: ""
 
 security:
-  # Fecha o acesso público (remove allUsers); exige IAM run.invoker.
   invoker_iam: private
 
 healthcheck:

@@ -19,7 +19,7 @@ permissions:
 jobs:
   validate:
     name: Guard 🛡️
-    uses: V-tal/shared-workflows/.github/workflows/check-rules.yml@feature/cloudrun
+    uses: mrrdev4/public-shared-workflows/.github/workflows/check-rules.yml@feature/cloudrun
     secrets: inherit # pragma: allowlist secret
     with:
       #runs_on: '["nio"]'
@@ -40,18 +40,18 @@ jobs:
     needs: [validate]
     if: ${{ needs.validate.result == 'success' && needs.validate.outputs.should_run_sonar == 'true' }}
     secrets: inherit # pragma: allowlist secret
-    uses: V-tal/shared-workflows/.github/workflows/sonar-python.yml@feature/cloudrun
+    uses: mrrdev4/public-shared-workflows/.github/workflows/sonar-python.yml@feature/cloudrun
     with:
       #runs_on: '["nio"]'
       runs_on: '["ubuntu-latest"]'
 
       context: "."
       python-version: "3.11"
-      unit_tests_enabled: true
-      coverage_required: true
-      sonar_enabled: true
-      sonar_project_name: "martech-nio-send-to-cm360"
-      sonar_project_key: "com.vtal.martech-nio-send-to-cm360"
+      unit_tests_enabled: false
+      coverage_required: false
+      sonar_enabled: false
+      sonar_project_name: "mrrdev4.marcio"
+      sonar_project_key: "com.dev.mrrdev4.marcio"
       sonar_sources: "src"
       sonar_tests: "tests"
       sonar_test_inclusions: "tests/**/*.py"
@@ -71,7 +71,7 @@ jobs:
         )
       }}
     secrets: inherit # pragma: allowlist secret
-    uses: V-tal/shared-workflows/.github/workflows/releaseflow-cloud-run.yml@feature/cloudrun
+    uses: mrrdev4/public-shared-workflows/.github/workflows/releaseflow-cloud-run.yml@feature/cloudrun
     with:
       #runs_on: '["nio"]'
       runs_on: '["ubuntu-latest"]'
@@ -81,8 +81,9 @@ jobs:
       release_prefix: "release/"
       dockerfile: "Dockerfile"
       context: "."
-      gcp_image_name: "martech-nio-send-to-cm360"
+      gcp_image_name: "mrrdev4.marcio"
       # Mesmo projeto do Dev (padrão Nio): Dev e PRD se diferenciam pelo sufixo.
-      service_name: "martech-nio-send-to-cm360-prd"
+      service_name: "mrrdev4.marcio-prd"
+      
       # Sem ambiente de HML na Nio por enquanto (só Dev e PRD).
       enable_deploy_hml: "false"

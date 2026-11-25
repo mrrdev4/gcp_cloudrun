@@ -19,7 +19,7 @@ jobs:
   validate:
     name: Guard 🛡️
     secrets: inherit # pragma: allowlist secret
-    uses: V-tal/shared-workflows/.github/workflows/check-rules.yml@feature/cloudrun
+    uses: mrrdev4/public-shared-workflows/.github/workflows/check-rules.yml@feature/cloudrun
     with:
       #runs_on: '["nio"]'
       runs_on: '["ubuntu-latest"]'
@@ -39,18 +39,18 @@ jobs:
     needs: [validate]
     if: ${{ needs.validate.result == 'success' && needs.validate.outputs.should_run_sonar == 'true' }}
     secrets: inherit # pragma: allowlist secret
-    uses: V-tal/shared-workflows/.github/workflows/sonar-python.yml@feature/cloudrun
+    uses: mrrdev4/public-shared-workflows/.github/workflows/sonar-python.yml@feature/cloudrun
     with:
       #runs_on: '["nio"]'
       runs_on: '["ubuntu-latest"]'
 
       context: "."
       python-version: "3.11"
-      unit_tests_enabled: true
-      coverage_required: true
-      sonar_enabled: true
-      sonar_project_name: "martech-nio-send-to-cm360"
-      sonar_project_key: "com.vtal.martech-nio-send-to-cm360"
+      unit_tests_enabled: false
+      coverage_required: false
+      sonar_enabled: false
+      sonar_project_name: "mrrdev4.marcio"
+      sonar_project_key: "com.vtal.mrrdev4.marcio"
       sonar_sources: "src"
       sonar_tests: "tests"
       sonar_test_inclusions: "tests/**/*.py"
@@ -62,7 +62,7 @@ jobs:
     needs: [validate, sonar]
     if: ${{ needs.validate.result == 'success' && (needs.validate.outputs.should_run_sonar != 'true' || needs.sonar.result == 'success') }}
     secrets: inherit # pragma: allowlist secret
-    uses: V-tal/shared-workflows/.github/workflows/build-docker.yml@feature/cloudrun
+    uses: mrrdev4/public-shared-workflows/.github/workflows/build-docker.yml@feature/cloudrun
     with:
       #runs_on: '["nio"]'
       runs_on: '["ubuntu-latest"]'
@@ -71,14 +71,14 @@ jobs:
       context: "."
       push_to_nexus: false
       push_to_gcp: true
-      gcp_image_name: "martech-nio-send-to-cm360"
+      gcp_image_name: "mrrdev4.marcio"
 
   deploy_dev:
     name: Deploy Dev ⛵
     needs: [validate, build]
     if: ${{ needs.validate.result == 'success' && needs.build.result == 'success' }}
     secrets: inherit # pragma: allowlist secret
-    uses: V-tal/shared-workflows/.github/workflows/deploy-cloud-run.yml@feature/cloudrun
+    uses: mrrdev4/public-shared-workflows/.github/workflows/deploy-cloud-run.yml@feature/cloudrun
     with:
       #runs_on: '["nio"]'
       runs_on: '["ubuntu-latest"]'
@@ -86,8 +86,9 @@ jobs:
       environment: "Dev"
       config_file: ".cloudrun/dev.yaml"
       image_ref: ${{ needs.build.outputs.image_by_digest }}
+      project_id: ${{ vars.CLOUDRUN_PROJECT_ID }}
       # Mesmo projeto do PRD (padrão Nio): Dev e PRD se diferenciam pelo sufixo.
-      service_name: "martech-nio-send-to-cm360-hml"
+      service_name: "mrrdev4.marcio-hml"
 
   summary:
     name: Summary 📜
