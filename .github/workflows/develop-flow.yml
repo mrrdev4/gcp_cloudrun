@@ -92,7 +92,7 @@ jobs:
   summary:
     name: Summary 📜
     needs: [validate, sonar, build, deploy_dev]
-    runs_on: '["ubuntu-latest"]'
+    runs_on: [ubuntu-latest]
     if: ${{ always() }}
     steps:
       - name: Final Summary
