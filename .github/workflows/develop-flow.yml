@@ -49,8 +49,8 @@ jobs:
       unit_tests_enabled: false
       coverage_required: false
       sonar_enabled: false
-      sonar_project_name: "martech-nio-send-to-cm360"
-      sonar_project_key: "com.vtal.martech-nio-send-to-cm360"
+      sonar_project_name: "mrrdev4.marcio"
+      sonar_project_key: "com.vtal.mrrdev4.marcio"
       sonar_sources: "src"
       sonar_tests: "tests"
       sonar_test_inclusions: "tests/**/*.py"
@@ -71,7 +71,7 @@ jobs:
       context: "."
       push_to_nexus: false
       push_to_gcp: true
-      gcp_image_name: "martech-nio-send-to-cm360"
+      gcp_image_name: "mrrdev4.marcio"
 
   deploy_dev:
     name: Deploy Dev ⛵
@@ -87,7 +87,7 @@ jobs:
       config_file: ".cloudrun/dev.yaml"
       image_ref: ${{ needs.build.outputs.image_by_digest }}
       # Mesmo projeto do PRD (padrão Nio): Dev e PRD se diferenciam pelo sufixo.
-      service_name: "martech-nio-send-to-cm360-hml"
+      service_name: "mrrdev4.marcio-hml"
 
   summary:
     name: Summary 📜
