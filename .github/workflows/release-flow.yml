@@ -1,0 +1,82 @@
+name: Release Flow 🚀
+
+on:
+  workflow_dispatch: {}
+  create:
+    branches: ["release/**"]
+  pull_request:
+    branches: ["main", "release/**"]
+    types: [opened, reopened, synchronize, ready_for_review, closed]
+  push:
+    branches: ["release/**"]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  id-token: write
+
+jobs:
+  validate:
+    name: Guard 🛡️
+    uses: V-tal/shared-workflows/.github/workflows/check-rules.yml@feature/cloudrun
+    secrets: inherit # pragma: allowlist secret
+    with:
+      runs_on: '["nio"]'
+      trigger_event_name: ${{ github.event_name }}
+      push_created: ${{ (github.event_name == 'push' && github.event.created) || false }}
+      main_branch: "main"
+      release_prefix: "release/"
+      feature_prefix: "feature/"
+      bugfix_prefix: "bugfix/"
+      hotfix_prefix: "hotfix/"
+      ignore_bot_prs: true
+      allow_workflow_dispatch: true
+
+  sonar:
+    name: SonarQube Scan 🔍
+    needs: [validate]
+    if: ${{ needs.validate.result == 'success' && needs.validate.outputs.should_run_sonar == 'true' }}
+    secrets: inherit # pragma: allowlist secret
+    uses: V-tal/shared-workflows/.github/workflows/sonar-python.yml@feature/cloudrun
+    with:
+      runs_on: '["nio"]'
+      context: "."
+      python-version: "3.11"
+      unit_tests_enabled: true
+      coverage_required: true
+      sonar_enabled: true
+      sonar_project_name: "martech-nio-send-to-cm360"
+      sonar_project_key: "com.vtal.martech-nio-send-to-cm360"
+      sonar_sources: "src"
+      sonar_tests: "tests"
+      sonar_test_inclusions: "tests/**/*.py"
+      sonar_exclusions: ".venv/**,venv/**,dist/**,build/**,**/__pycache__/**"
+      sonar_coverage: "coverage.xml"
+
+  releaseflow:
+    name: Release Flow Cloud Run 🚀
+    needs: [validate, sonar]
+    if: >-
+      ${{ always() &&
+        needs.validate.result == 'success' &&
+        needs.validate.outputs.should_run == 'true' &&
+        (
+          needs.validate.outputs.should_run_sonar != 'true' ||
+          needs.sonar.result == 'success'
+        )
+      }}
+    secrets: inherit # pragma: allowlist secret
+    uses: V-tal/shared-workflows/.github/workflows/releaseflow-cloud-run.yml@feature/cloudrun
+    with:
+      runs_on: '["nio"]'
+      trigger_event_name: ${{ github.event_name }}
+      main_branch: "main"
+      release_prefix: "release/"
+      dockerfile: "Dockerfile"
+      context: "."
+      gcp_image_name: "martech-nio-send-to-cm360"
+      # Mesmo projeto do Dev (padrão Nio): Dev e PRD se diferenciam pelo sufixo.
+      service_name: "martech-nio-send-to-cm360-prd"
+      # Sem ambiente de HML na Nio por enquanto (só Dev e PRD).
+      enable_deploy_hml: "false"

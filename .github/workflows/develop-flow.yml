@@ -1,0 +1,114 @@
+name: Build & Deploy Dev 🚀
+
+on:
+  push:
+    branches: ["feature/**", "bugfix/**", "hotfix/**"]
+  workflow_dispatch: {}
+
+concurrency:
+  group: dev-${{ github.repository }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  actions: read
+  pull-requests: read
+  id-token: write
+
+jobs:
+  validate:
+    name: Guard 🛡️
+    secrets: inherit # pragma: allowlist secret
+    uses: V-tal/shared-workflows/.github/workflows/check-rules.yml@feature/cloudrun
+    with:
+      #runs_on: '["nio"]'
+      runs_on: '["ubuntu-latest"]'
+
+      trigger_event_name: ${{ github.event_name }}
+      push_created: ${{ github.event.created }}
+      main_branch: "main"
+      release_prefix: "release/"
+      feature_prefix: "feature/"
+      bugfix_prefix: "bugfix/"
+      hotfix_prefix: "hotfix/"
+      ignore_bot_prs: true
+      allow_workflow_dispatch: true
+
+  sonar:
+    name: SonarQube Scan 🔍
+    needs: [validate]
+    if: ${{ needs.validate.result == 'success' && needs.validate.outputs.should_run_sonar == 'true' }}
+    secrets: inherit # pragma: allowlist secret
+    uses: V-tal/shared-workflows/.github/workflows/sonar-python.yml@feature/cloudrun
+    with:
+      #runs_on: '["nio"]'
+      runs_on: '["ubuntu-latest"]'
+
+      context: "."
+      python-version: "3.11"
+      unit_tests_enabled: true
+      coverage_required: true
+      sonar_enabled: true
+      sonar_project_name: "martech-nio-send-to-cm360"
+      sonar_project_key: "com.vtal.martech-nio-send-to-cm360"
+      sonar_sources: "src"
+      sonar_tests: "tests"
+      sonar_test_inclusions: "tests/**/*.py"
+      sonar_exclusions: ".venv/**,venv/**,dist/**,build/**,**/__pycache__/**"
+      sonar_coverage: "coverage.xml"
+
+  build:
+    name: Build & Push ♻️
+    needs: [validate, sonar]
+    if: ${{ needs.validate.result == 'success' && (needs.validate.outputs.should_run_sonar != 'true' || needs.sonar.result == 'success') }}
+    secrets: inherit # pragma: allowlist secret
+    uses: V-tal/shared-workflows/.github/workflows/build-docker.yml@feature/cloudrun
+    with:
+      #runs_on: '["nio"]'
+      runs_on: '["ubuntu-latest"]'
+
+      dockerfile: "Dockerfile"
+      context: "."
+      push_to_nexus: false
+      push_to_gcp: true
+      gcp_image_name: "martech-nio-send-to-cm360"
+
+  deploy_dev:
+    name: Deploy Dev ⛵
+    needs: [validate, build]
+    if: ${{ needs.validate.result == 'success' && needs.build.result == 'success' }}
+    secrets: inherit # pragma: allowlist secret
+    uses: V-tal/shared-workflows/.github/workflows/deploy-cloud-run.yml@feature/cloudrun
+    with:
+      #runs_on: '["nio"]'
+      runs_on: '["ubuntu-latest"]'
+
+      environment: "Dev"
+      config_file: ".cloudrun/dev.yaml"
+      image_ref: ${{ needs.build.outputs.image_by_digest }}
+      # Mesmo projeto do PRD (padrão Nio): Dev e PRD se diferenciam pelo sufixo.
+      service_name: "martech-nio-send-to-cm360-hml"
+
+  summary:
+    name: Summary 📜
+    needs: [validate, sonar, build, deploy_dev]
+    runs_on: '["ubuntu-latest"]'
+    if: ${{ always() }}
+    steps:
+      - name: Final Summary
+        shell: bash
+        run: |
+          {
+            echo "## Dev Push Flow — Resumo"
+            echo "- branch: \`${GITHUB_REF_NAME}\`"
+            echo "- build: \`${{ needs.build.result || 'skipped' }}\`"
+
+            IMAGE="${{ needs.build.outputs.image_by_digest }}"
+            if [[ -n "${IMAGE}" ]]; then
+              echo "- image: \`${IMAGE}\`"
+            else
+              echo "- image: \`<none>\`"
+            fi
+
+            echo "- deploy_dev: \`${{ needs.deploy_dev.result || 'skipped' }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"

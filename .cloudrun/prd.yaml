@@ -1,0 +1,71 @@
+service:
+  port: "8080"
+  cpu: "1"
+  memory: "512Mi"
+  min_instances: "0"
+  max_instances: "5"
+  concurrency: "80"
+  request_timeout: "60s"
+  execution_environment: gen2
+  cpu_allocation: request
+  startup_cpu_boost: enabled
+  session_affinity: disabled
+
+network:
+  ingress: all
+  vpc_connector: ""
+  network: ""
+  subnet: ""
+  network_tags: []
+  vpc_egress: ""
+  cloud_sql_instances: []
+
+environment:
+  variables:
+    APP_ENV: prd
+    LOG_LEVEL: INFO
+    OTEL_ENABLED: "false"
+    TZ: America/Sao_Paulo
+  secrets: {}
+  update_strategy: merge
+  secrets_update_strategy: merge  # pragma: allowlist secret
+
+labels:
+  component: backend
+  architecture: serverless
+  environment: prd
+
+finops:
+  enabled: true
+  required: true
+  cost_center: devops
+  business_unit: nio
+  product: hello-world-cloudrun
+  team: devops
+  owner: devops
+  criticality: high
+  data_classification: internal
+
+traffic:
+  revision_suffix: ""
+  tag: ""
+  no_traffic: false
+  revision_traffic: ""
+  tag_traffic: ""
+
+security:
+  # Fecha o acesso público (remove allUsers); exige IAM run.invoker.
+  invoker_iam: private
+
+healthcheck:
+  deploy_enabled: true
+  post_deploy_enabled: true
+  path: /health
+  auth: auto
+  expected_status: "200"
+  attempts: 10
+  delay_seconds: 10
+
+deploy:
+  skip_default_labels: true
+  extra_flags: ""
