@@ -75,7 +75,7 @@ jobs:
     with:
       #runs_on: '["nio"]'
       runs_on: '["ubuntu-latest"]'
-
+      project_id_prd: ${{ vars.CLOUDRUN_PROJECT_ID }}
       trigger_event_name: ${{ github.event_name }}
       main_branch: "main"
       release_prefix: "release/"
@@ -84,6 +84,5 @@ jobs:
       gcp_image_name: "mrrdev4.marcio"
       # Mesmo projeto do Dev (padrão Nio): Dev e PRD se diferenciam pelo sufixo.
       service_name: "mrrdev4.marcio-prd"
-      
       # Sem ambiente de HML na Nio por enquanto (só Dev e PRD).
       enable_deploy_hml: "false"
