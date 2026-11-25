@@ -16,6 +16,17 @@ def hello():
         "revision": os.environ.get("K_REVISION", "local"),
     })
 
+@app.route("/hello")
+def hello2():
+    return jsonify({
+        "status": "ok",
+        "message": "Hello World from Cloud Run!",
+        "app_env": os.environ.get("APP_ENV", "local"),
+        "log_level": os.environ.get("LOG_LEVEL", "INFO"),
+        "timezone": os.environ.get("TZ", "UTC"),
+        "service": os.environ.get("K_SERVICE", "local"),
+        "revision": os.environ.get("K_REVISION", "local"),
+    })
 
 @app.route("/health")
 @app.route("/healthz")
