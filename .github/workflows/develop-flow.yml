@@ -19,7 +19,7 @@ jobs:
   validate:
     name: Guard 🛡️
     secrets: inherit # pragma: allowlist secret
-    uses: V-tal/shared-workflows/.github/workflows/check-rules.yml@feature/cloudrun
+    uses: mrrdev4/public-shared-workflows/.github/workflows/check-rules.yml@feature/cloudrun
     with:
       #runs_on: '["nio"]'
       runs_on: '["ubuntu-latest"]'
@@ -39,7 +39,7 @@ jobs:
     needs: [validate]
     if: ${{ needs.validate.result == 'success' && needs.validate.outputs.should_run_sonar == 'true' }}
     secrets: inherit # pragma: allowlist secret
-    uses: V-tal/shared-workflows/.github/workflows/sonar-python.yml@feature/cloudrun
+    uses: mrrdev4/public-shared-workflows/.github/workflows/sonar-python.yml@feature/cloudrun
     with:
       #runs_on: '["nio"]'
       runs_on: '["ubuntu-latest"]'
@@ -62,7 +62,7 @@ jobs:
     needs: [validate, sonar]
     if: ${{ needs.validate.result == 'success' && (needs.validate.outputs.should_run_sonar != 'true' || needs.sonar.result == 'success') }}
     secrets: inherit # pragma: allowlist secret
-    uses: V-tal/shared-workflows/.github/workflows/build-docker.yml@feature/cloudrun
+    uses: mrrdev4/public-shared-workflows/.github/workflows/build-docker.yml@feature/cloudrun
     with:
       #runs_on: '["nio"]'
       runs_on: '["ubuntu-latest"]'
@@ -78,7 +78,7 @@ jobs:
     needs: [validate, build]
     if: ${{ needs.validate.result == 'success' && needs.build.result == 'success' }}
     secrets: inherit # pragma: allowlist secret
-    uses: V-tal/shared-workflows/.github/workflows/deploy-cloud-run.yml@feature/cloudrun
+    uses: mrrdev4/public-shared-workflows/.github/workflows/deploy-cloud-run.yml@feature/cloudrun
     with:
       #runs_on: '["nio"]'
       runs_on: '["ubuntu-latest"]'
