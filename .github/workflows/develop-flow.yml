@@ -86,6 +86,7 @@ jobs:
       environment: "Dev"
       config_file: ".cloudrun/dev.yaml"
       image_ref: ${{ needs.build.outputs.image_by_digest }}
+      project_id: ${{ vars.CLOUDRUN_PROJECT_ID }}
       # Mesmo projeto do PRD (padrão Nio): Dev e PRD se diferenciam pelo sufixo.
       service_name: "mrrdev4.marcio-hml"
 

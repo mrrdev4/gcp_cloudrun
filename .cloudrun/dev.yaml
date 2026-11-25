@@ -36,8 +36,8 @@ labels:
   environment: dev
 
 finops:
-  enabled: true
-  required: true
+  enabled: false
+  required: false
   cost_center: devops
   business_unit: nio
   product: hello-world-cloudrun
