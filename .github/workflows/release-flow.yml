@@ -22,7 +22,9 @@ jobs:
     uses: V-tal/shared-workflows/.github/workflows/check-rules.yml@feature/cloudrun
     secrets: inherit # pragma: allowlist secret
     with:
-      runs_on: '["nio"]'
+      #runs_on: '["nio"]'
+      runs_on: '["ubuntu-latest"]'
+
       trigger_event_name: ${{ github.event_name }}
       push_created: ${{ (github.event_name == 'push' && github.event.created) || false }}
       main_branch: "main"
@@ -40,7 +42,9 @@ jobs:
     secrets: inherit # pragma: allowlist secret
     uses: V-tal/shared-workflows/.github/workflows/sonar-python.yml@feature/cloudrun
     with:
-      runs_on: '["nio"]'
+      #runs_on: '["nio"]'
+      runs_on: '["ubuntu-latest"]'
+
       context: "."
       python-version: "3.11"
       unit_tests_enabled: true
@@ -69,7 +73,9 @@ jobs:
     secrets: inherit # pragma: allowlist secret
     uses: V-tal/shared-workflows/.github/workflows/releaseflow-cloud-run.yml@feature/cloudrun
     with:
-      runs_on: '["nio"]'
+      #runs_on: '["nio"]'
+      runs_on: '["ubuntu-latest"]'
+
       trigger_event_name: ${{ github.event_name }}
       main_branch: "main"
       release_prefix: "release/"
