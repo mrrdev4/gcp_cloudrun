@@ -49,7 +49,7 @@ Receber uma definição high-level (HLD), validar aderência arquitetural com AD
 8. Publicar resumo final com rastreabilidade: HLD → ADR → Arquivos alterados → Testes.
 
 ## Configuração recomendada neste repositório
-- Fonte ADR padrão (fixa): `https://github.com/V-tal/vtal-architecture-playbook/blob/main/docs/04-decisions`
+- Fonte ADR padrão (fixa): `https://github.com/mrrdev4/vtal-architecture-playbook/blob/main/docs/04-decisions`
 
 ## Mecanismo de leitura remota (obrigatório)
 Para inventariar ADRs, usar conexão GitHub ativa e leitura recursiva do diretório remoto via clone leve:

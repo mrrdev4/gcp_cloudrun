@@ -13,4 +13,4 @@ jobs:
   PrValidation:
     name: Validate PR Structure 🔍
     secrets: inherit # pragma: allowlist secrets
-    uses: V-tal/shared-workflows/.github/workflows/pr-validation.yml@feature/cloudrun
+    uses: mrrdev4/shared-workflows/.github/workflows/pr-validation.yml@feature/cloudrun
