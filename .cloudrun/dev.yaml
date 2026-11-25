@@ -1,31 +1,70 @@
-import os
-from flask import Flask, jsonify
+service:
+  port: "8080"
+  cpu: "1"
+  memory: "512Mi"
+  min_instances: "0"
+  max_instances: "2"
+  concurrency: "80"
+  request_timeout: "60s"
+  execution_environment: gen2
+  cpu_allocation: request
+  startup_cpu_boost: enabled
+  session_affinity: disabled
 
-app = Flask(__name__)
+network:
+  ingress: all
+  vpc_connector: ""
+  network: ""
+  subnet: ""
+  network_tags: []
+  vpc_egress: ""
+  cloud_sql_instances: []
 
+environment:
+  variables:
+    APP_ENV: dev
+    LOG_LEVEL: DEBUG
+    OTEL_ENABLED: "false"
+    TZ: America/Sao_Paulo
+  secrets: {}
+  update_strategy: merge
+  secrets_update_strategy: merge  # pragma: allowlist secret
 
-@app.route("/")
-def hello():
-    return jsonify({
-        "status": "ok",
-        "message": "Hello World from Cloud Run!",
-        "app_env": os.environ.get("APP_ENV", "local"),
-        "log_level": os.environ.get("LOG_LEVEL", "INFO"),
-        "timezone": os.environ.get("TZ", "UTC"),
-        "service": os.environ.get("K_SERVICE", "local"),
-        "revision": os.environ.get("K_REVISION", "local"),
-    })
+labels:
+  component: backend
+  architecture: serverless
+  environment: dev
 
+finops:
+  enabled: true
+  required: true
+  cost_center: devops
+  business_unit: nio
+  product: hello-world-cloudrun
+  team: devops
+  owner: devops
+  criticality: low
+  data_classification: internal
 
-@app.route("/health")
-@app.route("/healthz")
-def health():
-    return jsonify({
-        "status": "healthy",
-        "env": os.environ.get("APP_ENV", "local")
-    }), 200
+traffic:
+  revision_suffix: ""
+  tag: ""
+  no_traffic: false
+  revision_traffic: ""
+  tag_traffic: ""
 
+security:
+  invoker_iam: public
 
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8080))
-    app.run(host="0.0.0.0", port=port)
+healthcheck:
+  deploy_enabled: true
+  post_deploy_enabled: true
+  path: /health
+  auth: auto
+  expected_status: "200"
+  attempts: 10
+  delay_seconds: 5
+
+deploy:
+  skip_default_labels: true
+  extra_flags: ""
